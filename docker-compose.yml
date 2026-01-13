@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Container 1: Data Generator Service
+  app_generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        IMAGE_NAME: python-data-pipeline
+    image: python-data-pipeline:latest
+    container_name: python-generator
+    command: python app.py
+    environment:
+      - SERVICE_NAME=Generator
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - python-network
+    restart: unless-stopped
+
+  # Container 2: Data Processor Service
+  app_processor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        IMAGE_NAME: python-data-pipeline
+    image: python-data-pipeline:latest
+    container_name: python-processor
+    command: python processor.py
+    environment:
+      - SERVICE_NAME=Processor
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - python-network
+    restart: unless-stopped
+
+networks:
+  python-network:
+    driver: bridge

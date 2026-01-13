@@ -1,13 +1,10 @@
 # Python Docker Application - Project Guide
 
-## 📋 Project Description
-
-This is a simple Python application containerized with Docker that generates random numbers using **NumPy** and prints them with the current date and time every 5 seconds. It demonstrates Docker fundamentals including:
-- Creating a Dockerfile with best practices
-- Building and running Docker images/containers
-- Managing dependencies with requirements.txt
-- Pushing to Docker Hub
-- Proper project structure
+This is a **multi-container Python application** using Docker and Docker Compose that:
+- **Container 1**: Generates random numbers using **NumPy** every 5 seconds
+- **Container 2**: Processes data using **Pandas**
+- Both containers communicate on a shared network
+- It demonstrates Docker Compose for orchestrating multiple containers
 
 ---
 
@@ -15,42 +12,160 @@ This is a simple Python application containerized with Docker that generates ran
 
 ```
 Docker project/
-├── app.py                    # Main Python application script (uses numpy)
-├── Dockerfile               # Instructions to build Docker image
-├── requirements.txt         # Python dependencies list (numpy)
-├── .gitignore              # Git files to ignore (for GitHub)
-├── .dockerignore           # Docker files to ignore (for image build)
-└── README.md               # This file - project documentation
+├── app.py                        # Container 1: Data generator (uses numpy)
+├── processor.py                  # Container 2: Data processor
+├── Dockerfile                    # Single Dockerfile for both containers
+├── requirements.txt              # Dependencies (used by both containers)
+├── docker-compose.yml            # Orchestrates both containers
+├── .gitignore                    # Git files to ignore (for GitHub)
+├── .dockerignore                 # Docker files to ignore (for image build)
+└── README.md                     # This file - project documentation
 ```
 
 ### File Details:
 
 | File | Purpose |
 |------|---------|
-| **app.py** | Main application - generates random numbers every 5 seconds using numpy |
-| **Dockerfile** | Blueprint for building Docker image with all commands explained |
-| **requirements.txt** | Lists Python packages (numpy==1.24.0) |
+| **app.py** | Container 1 - generates random numbers every 5 seconds using numpy |
+| **processor.py** | Container 2 - processes data using pandas |
+| **Dockerfile** | Single blueprint used to build the image `python-data-pipeline` for both containers |
+| **requirements.txt** | Lists Python packages (numpy==1.24.0, pandas==2.0.0) - shared by both containers |
+| **docker-compose.yml** | Orchestrates both containers with one command - specifies which .py file each runs |
 | **.gitignore** | Tells Git which files NOT to track (cache, venv, etc.) |
 | **.dockerignore** | Tells Docker which files NOT to copy into image (keeps image smaller) |
 | **README.md** | Documentation (this file) |
 
 ---
 
-## 🚀 Quick Start Commands
+## 🚀 Quick Start Commands (With Docker Compose - TWO Containers)
 
-### 1. Build the Docker Image
+### Option 1: Run Both Containers Together with Docker Compose 🎯 RECOMMENDED
+
 ```bash
-docker build -t python-docker-app .
+docker-compose up
 ```
 
-**What it does:** Creates a Docker image named `python-docker-app` from the Dockerfile
+**What it does:** 
+- Builds the Docker image `python-data-pipeline` (if not already built)
+- Starts both containers simultaneously
+- Container 1 (app_generator): Generates random numbers every 5 seconds
+- Container 2 (app_processor): Processes data every 7 seconds
+- Both containers run on the same internal network (`python-network`)
+
+**To run in background:**
+```bash
+docker-compose up -d
+```
+
+**To view logs:**
+```bash
+docker-compose logs -f
+```
+
+**To stop all containers:**
+```bash
+docker-compose down
+```
+
+---
+
+## 🏗️ Architecture: ONE IMAGE → MULTIPLE CONTAINERS
+
+### How It Works
+
+When you build the Docker image:
+```bash
+docker build -t python-data-pipeline .
+```
+
+You create **ONE Docker image** that contains:
+- Both `app.py` and `processor.py`
+- All dependencies (numpy, pandas)
+- Python 3.11 runtime
+
+When docker-compose runs:
+```bash
+docker-compose up
+```
+
+It creates **TWO containers** from that **SAME image**:
+
+```
+IMAGE: python-data-pipeline (ONE - shared by both)
+│
+├── Container 1: python-generator (runs: python app.py)
+│
+└── Container 2: python-processor (runs: python processor.py)
+```
+
+### Book Analogy 📚
+
+Think of it like reading a book:
+- **Image** = One physical book (ONE)
+- **Containers** = Multiple people reading from it (MULTIPLE)
+- Each person can read a different page simultaneously
+
+**Benefits:**
+- 🔹 Saves disk space (one image, not two)
+- 🔹 Faster to build (build once, run many times)
+- 🔹 Consistent environment for all containers
+- 🔹 Easy to scale (create more containers from same image)
+
+---
+
+#### Without Docker Compose (Manual - Multiple Commands):
+```bash
+# Step 1: BUILD the image (manually)
+docker build -t python-data-pipeline .
+
+# Step 2: RUN Container 1 (manually)
+docker run -d --name python-generator python-data-pipeline python app.py
+
+# Step 2: RUN Container 2 (manually)
+docker run -d --name python-processor python-data-pipeline python processor.py
+```
+
+**3 commands needed** - you handle building and running separately
+
+---
+
+#### With Docker Compose (Automated - One Command):
+```bash
+# Does EVERYTHING: BUILD (if needed) + RUN both containers
+docker-compose up
+```
+
+**1 command does it all** - docker-compose automatically:
+1. Builds the image (if not already built)
+2. Creates and starts both containers
+3. Sets up networking between them
+
+**Key Point:** Docker Compose is an **all-in-one orchestration tool** - it handles both image building AND running multiple containers!
+
+**Benefits:**
+- 🔹 One command instead of 3
+- 🔹 Automatic networking between containers
+- 🔹 Easy to manage (logs, restart, stop all at once)
+- 🔹 Reproducible setup (everyone runs the same config)
+- 🔹 Layer caching speeds up rebuilds
+
+---
+
+### Option 2: Manual Docker Commands (OLD METHOD - For Reference Only)
+
+#### 1. Build the Docker Image
+```bash
+docker build -t python-data-pipeline .
+```
+
+**What it does:** Creates a Docker image named `python-data-pipeline` from the Dockerfile
 
 **Breaking down the command:**
 - `docker` = Docker command
 - `build` = Build an image
-- `-t python-docker-app` = Tag/name the image as "python-docker-app"
+- `-t python-data-pipeline` = Tag/name the image as "python-data-pipeline"
   - `-t` flag = Tag (name) for the image
-  - `python-docker-app` = The name you're giving it
+  - `python-data-pipeline` = The name you're giving it (represents both .py files)
 - `.` = Use Dockerfile from current directory (the dot means "here")
 
 **Example output:**
@@ -60,58 +175,59 @@ Step 1/6 : FROM python:3.11-slim
 Step 2/6 : WORKDIR /app
 ...
 Successfully built abc123def456
-Successfully tagged python-docker-app:latest
+Successfully tagged python-data-pipeline:latest
 ```
 
 ---
 
-### 2. Run the Container (Interactive - See Output)
+### 2. Run Container 1 (Generator) in Background
 ```bash
-docker run -it python-docker-app
+docker run -d --name python-generator python-data-pipeline python app.py
 ```
 
-**What it does:** Runs container in interactive mode (you see output in real-time)
+**What it does:** Runs the generator container in background
 
 **Breaking down the command:**
-- `docker` = Docker command
-- `run` = Run a new container
-- `-i` flag = Keep stdin open (keep input active)
-- `-t` flag = Allocate a pseudo-terminal (allocate screen output)
-- `-it` = Combination of both (interactive terminal)
-- `python-docker-app` = Image name to run
-
-**What you'll see:**
-```
-[2026-01-13 10:30:45] Hello from Docker! Random numbers: [42 87 15 63 29]
-[2026-01-13 10:30:50] Hello from Docker! Random numbers: [71 33 88 19 54]
-[2026-01-13 10:30:55] Hello from Docker! Random numbers: [45 62 91 28 76]
-```
-
-**To stop:** Press `Ctrl+C`
+- `docker run` = Run a new container
+- `-d` flag = Detach (run in background)
+- `--name python-generator` = Give the container a name
+- `python-data-pipeline` = Image name to run
+- `python app.py` = Command to run inside the container
 
 ---
 
-### 3. Run the Container (Background - Keep Running)
+### 3. Run Container 2 (Processor) in Background
 ```bash
-docker run -d --name my-app python-docker-app
+docker run -d --name python-processor python-data-pipeline python processor.py
 ```
 
-**What it does:** Runs container in background (you get your terminal back)
+**What it does:** Runs the processor container in background
 
 **Breaking down the command:**
-- `docker` = Docker command
-- `run` = Run a new container
-- `-d` flag = Detach (run in background, don't show output)
-- `--name my-app` = Give the container a friendly name "my-app"
-  - `--name` = Flag to set container name
-  - `my-app` = The name you're giving the container
-- `python-docker-app` = Image name to run
+- `docker run` = Run a new container
+- `-d` flag = Detach (run in background)
+- `--name python-processor` = Give the container a name
+- `python-data-pipeline` = Image name to run
+- `python processor.py` = Command to run inside the container
 
-**What you'll see:**
+---
+
+### 4. View Logs
+```bash
+docker logs -f python-generator
+docker logs -f python-processor
 ```
-abc123def456789
+
+**What it does:** Shows real-time output from each container
+
+---
+
+### 5. Stop Containers
+```bash
+docker stop python-generator python-processor
 ```
-(This is the container ID)
+
+**What it does:** Stops both containers
 
 **Now you can use the container name `my-app` in other commands**
 
@@ -398,12 +514,12 @@ docker exec -it my-app bash
 
 ## 📚 Docker Best Practices Used in This Project
 
-✅ **Slim Base Image** - Uses `python:3.11-slim` instead of full image (smaller = faster)
-✅ **Layer Caching** - Copies requirements.txt before app.py for better caching
-✅ **Comments** - Dockerfile has detailed comments explaining each command
-✅ **.dockerignore** - Excludes unnecessary files from build (smaller images)
-✅ **PYTHONUNBUFFERED** - Environment variable ensures instant log output
-✅ **Working Directory** - Uses WORKDIR for cleaner file management
+🔹 **Slim Base Image** - Uses `python:3.11-slim` instead of full image (smaller = faster)
+🔹 **Layer Caching** - Copies requirements.txt before app.py for better caching
+🔹 **Comments** - Dockerfile has detailed comments explaining each command
+🔹 **.dockerignore** - Excludes unnecessary files from build (smaller images)
+🔹 **PYTHONUNBUFFERED** - Environment variable ensures instant log output
+🔹 **Working Directory** - Uses WORKDIR for cleaner file management
 
 ---
 
@@ -546,7 +662,7 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 
 **What this demonstrates:**
 
-#### ✅ Docker Skills
+#### 🐳 Docker Skills
 - **Container Knowledge** - Understand how to containerize applications
 - **Image Building** - Create optimized Docker images from Dockerfile
 - **Layering & Caching** - Use best practices (COPY requirements first)
@@ -555,7 +671,7 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 
 **Show employers:** You can package any application for deployment!
 
-#### ✅ Python Skills
+#### 🐍 Python Skills
 - **NumPy Integration** - Use scientific computing libraries
 - **Dependency Management** - Manage requirements.txt properly
 - **Environment Variables** - Handle configuration via .env
@@ -564,7 +680,7 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 
 **Show employers:** You write production-ready Python code!
 
-#### ✅ DevOps Knowledge
+#### ⚙️ DevOps Knowledge
 - **Infrastructure Concepts** - Understand containerization principles
 - **Deployment Process** - Know how to deploy applications
 - **Cloud-Ready** - Your app can run anywhere (local, cloud, servers)
@@ -573,7 +689,7 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 
 **Show employers:** You understand modern DevOps practices!
 
-#### ✅ Git/GitHub Proficiency
+#### 🔗 Git/GitHub Proficiency
 - **Version Control** - Track code changes with meaningful commits
 - **Repository Management** - Organize projects professionally
 - **Collaboration Skills** - Know how to work in teams
@@ -582,7 +698,7 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 
 **Show employers:** You use professional development workflows!
 
-#### ✅ Modern Development Practices
+#### 🚀 Modern Development Practices
 - **Containerization** - Industry-standard deployment method
 - **Documentation** - Comprehensive README with examples
 - **Multiple Environments** - Work locally and on cloud

@@ -29,8 +29,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # COPY APPLICATION FILES
-# Copy app.py from current directory (host) to /app (container)
+# Copy both app.py and processor.py to the container
+# Each container will run a different script specified in docker-compose.yml
 COPY app.py .
+COPY processor.py .
 
 # SET ENVIRONMENT VARIABLE (optional but good practice)
 # PYTHONUNBUFFERED=1 ensures Python output is sent directly to logs
@@ -38,8 +40,7 @@ COPY app.py .
 ENV PYTHONUNBUFFERED=1
 
 # DEFAULT COMMAND to run when container starts
-# CMD ["python", "app.py"] - runs the application
-# This can be overridden with: docker run <image> python other_script.py
+# This will be overridden by docker-compose.yml for each container
 CMD ["python", "app.py"]
 
 # ============================================
@@ -60,4 +61,3 @@ CMD ["python", "app.py"]
 #
 # STOP CONTAINER:
 # docker stop my-app
-# ============================================

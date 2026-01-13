@@ -1,6 +1,5 @@
-# ============================================
 # .dockerignore - Files to exclude from Docker build
-# ============================================
+
 # Similar to .gitignore, this file tells Docker what NOT to copy
 # into the container image, keeping the image smaller and faster
 #
