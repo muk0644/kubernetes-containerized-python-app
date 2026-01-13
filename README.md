@@ -42,57 +42,184 @@ Docker project/
 ```bash
 docker build -t python-docker-app .
 ```
-**What it does:** Creates a Docker image named `python-docker-app` from the Dockerfile
-- `-t` flag: tags/names the image
-- `.` : uses Dockerfile in current directory
 
-### 2. Run the Container (Interactive)
+**What it does:** Creates a Docker image named `python-docker-app` from the Dockerfile
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `build` = Build an image
+- `-t python-docker-app` = Tag/name the image as "python-docker-app"
+  - `-t` flag = Tag (name) for the image
+  - `python-docker-app` = The name you're giving it
+- `.` = Use Dockerfile from current directory (the dot means "here")
+
+**Example output:**
+```
+Sending build context to Docker daemon
+Step 1/6 : FROM python:3.11-slim
+Step 2/6 : WORKDIR /app
+...
+Successfully built abc123def456
+Successfully tagged python-docker-app:latest
+```
+
+---
+
+### 2. Run the Container (Interactive - See Output)
 ```bash
 docker run -it python-docker-app
 ```
-**What it does:** Runs container in interactive mode (see output in real-time)
-- `-i` : keep stdin open even if not attached
-- `-t` : allocate a pseudo-terminal
-- Press `Ctrl+C` to stop
 
-### 3. Run the Container (Background)
+**What it does:** Runs container in interactive mode (you see output in real-time)
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `run` = Run a new container
+- `-i` flag = Keep stdin open (keep input active)
+- `-t` flag = Allocate a pseudo-terminal (allocate screen output)
+- `-it` = Combination of both (interactive terminal)
+- `python-docker-app` = Image name to run
+
+**What you'll see:**
+```
+[2026-01-13 10:30:45] Hello from Docker! Random numbers: [42 87 15 63 29]
+[2026-01-13 10:30:50] Hello from Docker! Random numbers: [71 33 88 19 54]
+[2026-01-13 10:30:55] Hello from Docker! Random numbers: [45 62 91 28 76]
+```
+
+**To stop:** Press `Ctrl+C`
+
+---
+
+### 3. Run the Container (Background - Keep Running)
 ```bash
 docker run -d --name my-app python-docker-app
 ```
-**What it does:** Runs container in background
-- `-d` : detach (run in background)
-- `--name my-app` : gives container a readable name
+
+**What it does:** Runs container in background (you get your terminal back)
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `run` = Run a new container
+- `-d` flag = Detach (run in background, don't show output)
+- `--name my-app` = Give the container a friendly name "my-app"
+  - `--name` = Flag to set container name
+  - `my-app` = The name you're giving the container
+- `python-docker-app` = Image name to run
+
+**What you'll see:**
+```
+abc123def456789
+```
+(This is the container ID)
+
+**Now you can use the container name `my-app` in other commands**
+
+---
 
 ### 4. View Running Containers
 ```bash
 docker ps
 ```
-**What it does:** Lists all running containers
+
+**What it does:** Lists all currently running containers
+
+**What you'll see:**
+```
+CONTAINER ID   IMAGE                 COMMAND            STATUS
+abc123def456   python-docker-app     "python app.py"    Up 2 minutes  my-app
+```
+
+**To see stopped containers too:**
+```bash
+docker ps -a
+```
+- `-a` flag = All containers (including stopped ones)
+
+---
 
 ### 5. View Container Logs
 ```bash
 docker logs my-app
 ```
+
 **What it does:** Shows output from the running container
-- Use `--follow` to stream logs: `docker logs --follow my-app`
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `logs` = Show logs/output
+- `my-app` = Container name (from `--name my-app`)
+
+**What you'll see:**
+```
+[2026-01-13 10:30:45] Hello from Docker! Random numbers: [42 87 15 63 29]
+[2026-01-13 10:30:50] Hello from Docker! Random numbers: [71 33 88 19 54]
+[2026-01-13 10:30:55] Hello from Docker! Random numbers: [45 62 91 28 76]
+```
+
+**To see logs in real-time (keep watching):**
+```bash
+docker logs --follow my-app
+```
+- `--follow` flag = Stream logs continuously (like `tail -f`)
+
+**To stop streaming:** Press `Ctrl+C`
+
+---
 
 ### 6. Stop the Container
 ```bash
 docker stop my-app
 ```
+
 **What it does:** Gracefully stops the running container
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `stop` = Stop a container
+- `my-app` = Container name to stop
+
+**Note:** Container still exists, just not running (can restart with `docker start my-app`)
+
+---
 
 ### 7. Remove Container
 ```bash
 docker rm my-app
 ```
-**What it does:** Deletes the stopped container
+
+**What it does:** Deletes the stopped container completely
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `rm` = Remove
+- `my-app` = Container name to delete
+
+**Warning:** This deletes the container. You can't recover it!
+
+**To remove running container forcefully:**
+```bash
+docker rm -f my-app
+```
+- `-f` flag = Force remove (even if running)
+
+---
 
 ### 8. Remove Image
 ```bash
 docker rmi python-docker-app
 ```
-**What it does:** Deletes the Docker image (frees up space)
+
+**What it does:** Deletes the Docker image (frees up disk space)
+
+**Breaking down the command:**
+- `docker` = Docker command
+- `rmi` = Remove image
+- `python-docker-app` = Image name to delete
+
+**Note:** Must delete all containers using this image first!
+
+---
 
 ---
 
@@ -414,15 +541,104 @@ Visit: `https://github.com/YOUR_USERNAME/python-docker-numpy`
 ### Step 5: Portfolio Optimization
 
 **Add to your portfolio:**
-- GitHub repo link: `https://github.com/YOUR_USERNAME/python-docker-numpy`
-- Docker Hub link: `https://hub.docker.com/r/YOUR_USERNAME/python-docker-app`
+- GitHub repo link: `https://github.com/muk0644/docker-containerized-python-app`
+- Docker Hub link: `https://hub.docker.com/r/muk0644/python-docker-app`
 
 **What this demonstrates:**
-- ✅ Docker skills (containerization, image building)
-- ✅ Python skills (NumPy integration)
-- ✅ DevOps knowledge (Docker Hub deployment)
-- ✅ Git/GitHub proficiency (version control)
-- ✅ Modern development practices
+
+#### ✅ Docker Skills
+- **Container Knowledge** - Understand how to containerize applications
+- **Image Building** - Create optimized Docker images from Dockerfile
+- **Layering & Caching** - Use best practices (COPY requirements first)
+- **Image Optimization** - Use slim base images to reduce size
+- **Docker Hub Deployment** - Push images to public registries
+
+**Show employers:** You can package any application for deployment!
+
+#### ✅ Python Skills
+- **NumPy Integration** - Use scientific computing libraries
+- **Dependency Management** - Manage requirements.txt properly
+- **Environment Variables** - Handle configuration via .env
+- **Clean Code** - Well-structured, readable Python scripts
+- **Library Usage** - Demonstrate proficiency with external packages
+
+**Show employers:** You write production-ready Python code!
+
+#### ✅ DevOps Knowledge
+- **Infrastructure Concepts** - Understand containerization principles
+- **Deployment Process** - Know how to deploy applications
+- **Cloud-Ready** - Your app can run anywhere (local, cloud, servers)
+- **Scalability** - Docker apps are easily scalable
+- **Best Practices** - Follow industry standards
+
+**Show employers:** You understand modern DevOps practices!
+
+#### ✅ Git/GitHub Proficiency
+- **Version Control** - Track code changes with meaningful commits
+- **Repository Management** - Organize projects professionally
+- **Collaboration Skills** - Know how to work in teams
+- **Documentation** - Write clear READMEs
+- **Public Portfolio** - Share your work publicly
+
+**Show employers:** You use professional development workflows!
+
+#### ✅ Modern Development Practices
+- **Containerization** - Industry-standard deployment method
+- **Documentation** - Comprehensive README with examples
+- **Multiple Environments** - Work locally and on cloud
+- **Automation** - Automated builds and deployments
+- **Best Practices** - Follow Docker/Python/Git conventions
+
+**Show employers:** You're up-to-date with current tech trends!
+
+---
+
+## 💼 How to Add to Your Portfolio Website
+
+### Option 1: Add to Your Resume
+```
+Docker & Python Project - docker-containerized-python-app
+• Built containerized Python application using Docker with NumPy
+• Created Dockerfile with best practices for image optimization
+• Deployed to Docker Hub for public sharing and accessibility
+• Managed project with Git/GitHub for version control
+Technologies: Python, Docker, NumPy, Git, GitHub, DevOps
+GitHub: github.com/muk0644/docker-containerized-python-app
+Docker Hub: hub.docker.com/r/muk0644/python-docker-app
+```
+
+### Option 2: Add to Portfolio Website
+Include these links:
+- 🔗 **GitHub Repository:** https://github.com/muk0644/docker-containerized-python-app
+- 🐳 **Docker Hub Image:** https://hub.docker.com/r/muk0644/python-docker-app
+- 📚 **Full Documentation:** See README.md in repository
+
+### Option 3: Highlight in LinkedIn/Profile
+```
+"Developed and containerized a Python application using Docker, 
+demonstrating proficiency in modern DevOps practices and cloud deployment. 
+Image available on Docker Hub for production use."
+```
+
+---
+
+## 🎯 Why Employers Love This Project
+
+1. **Shows Real Skills** - Not just tutorials, actual implementation
+2. **DevOps Knowledge** - Understanding of containerization (hot skill!)
+3. **Complete Workflow** - GitHub + Docker Hub shows full deployment pipeline
+4. **Scalable Thinking** - Demonstrates cloud-native development
+5. **Professional** - Well-documented, organized, production-ready
+
+---
+
+## 📊 Project Statistics to Share
+
+- **Languages:** Python
+- **Technologies:** Docker, NumPy, Git
+- **Files:** 6 (app.py, Dockerfile, requirements.txt, README.md, .gitignore, .dockerignore)
+- **Documentation:** Comprehensive with examples
+- **Deployment:** Both GitHub and Docker Hub
 
 ---
 
