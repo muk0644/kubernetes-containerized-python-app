@@ -1,0 +1,74 @@
+---
+# Kubernetes Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: python-app
+
+---
+# Deployment 1: Data Generator (app.py)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-generator
+  namespace: python-app
+  labels:
+    app: python-data-pipeline
+    component: generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-data-pipeline
+      component: generator
+  template:
+    metadata:
+      labels:
+        app: python-data-pipeline
+        component: generator
+    spec:
+      containers:
+      - name: generator
+        image: python-data-pipeline:latest
+        command: ["python", "app.py"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+---
+# Deployment 2: Data Processor (processor.py)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-processor
+  namespace: python-app
+  labels:
+    app: python-data-pipeline
+    component: processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-data-pipeline
+      component: processor
+  template:
+    metadata:
+      labels:
+        app: python-data-pipeline
+        component: processor
+    spec:
+      containers:
+      - name: processor
+        image: python-data-pipeline:latest
+        command: ["python", "processor.py"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
