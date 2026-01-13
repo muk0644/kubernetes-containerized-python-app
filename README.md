@@ -1,5 +1,7 @@
 # Python Kubernetes Application - Project Guide
 
+> **Note:** This project is for learning purposes only. This was part of my learning journey in understanding containerization and Docker concepts.
+
 This is a **multi-pod Python application** using Kubernetes that:
 - **Pod 1 (Generator)**: Generates random numbers using **NumPy** every 5 seconds
 - **Pod 2 (Processor)**: Processes data using **Pandas** every 7 seconds  
